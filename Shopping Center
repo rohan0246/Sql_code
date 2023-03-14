@@ -1,0 +1,63 @@
+select * from shopping_data
+order by invoice_date
+
+--Remove Duplicates
+
+WITH RowNumCTE AS(
+Select*,
+	ROW_NUMBER() OVER (
+	PARTITION BY invoice_no,customer_id,gender,age,category,price,payment_method,invoice_date,shopping_mall
+
+				 ORDER BY
+					invoice_no
+					) row_num
+
+From shopping_data
+--order by ParcelID
+)
+Select*
+From RowNumCTE
+Where row_num >1
+Order by invoice_date
+
+
+-- standarizing date formate 
+
+
+
+Select invoice_date_converted, CONVERT(Date,invoice_date) 
+From shopping_data
+
+
+Update shopping_data
+invoice_date_converted = CONVERT(Date,invoice_date)
+
+--If it doesn't Update properly
+
+ALTER TABLE shopping_data
+Add invoice_date_converted Date;
+
+Update shopping_data
+set invoice_date_converted =CONVERT(Date,invoice_date)
+
+select * from shopping_data
+order by invoice_date_converted
+
+alter table shopping_data
+drop column invoice_date
+
+SELECT DAY(invoice_date_converted) as order_day
+FROM shopping_data;
+
+SELECT DAY(invoice_date_converted) as day_column_name
+FROM shopping_data;
+
+SELECT DATENAME(weekday, invoice_date_converted) as day_of_week
+FROM shopping_data;
+
+ALTER TABLE shopping_data
+Add day_of_the_week nvarchar(255)
+
+Update shopping_data
+set day_of_the_week = DATENAME(weekday, invoice_date_converted)
+select * from shopping_data
